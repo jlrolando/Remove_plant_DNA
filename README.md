@@ -1,4 +1,4 @@
-# Remove Plant DNA
+# Remove Plant DNA from seagrasas metagenome contigs
 
 Snakemake pipeline for identifying and filtering plant (Viridiplantae) contigs from seagrass root metagenome assemblies. Uses three independent classification methods to produce a high-confidence set of plant contigs that can be used to remove plant-derived reads from future metagenomes before assembly.
 
