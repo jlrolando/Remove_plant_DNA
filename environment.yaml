@@ -1,0 +1,14 @@
+name: remove_plant_dna
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - snakemake>=7.0
+  - cat=5.3
+  - kraken2=2.1.3
+  - blast=2.14.0
+  - seqtk=1.4
+  - python>=3.9
+  - pandas
+  - biopython

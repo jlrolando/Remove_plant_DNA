@@ -1,0 +1,51 @@
+# =============================================================================
+# Configuration for plant contig filtering pipeline
+# =============================================================================
+
+# --- Input ---
+contigs: "/path/to/seagrass_root_metagenome_contigs.fasta"
+sample_name: "seagrass_root"
+
+# --- Output directory ---
+outdir: "results"
+
+# --- CAT database paths ---
+# Prepared with: CAT prepare --fresh -d cat_db -t cat_tax
+cat_db: "/path/to/CAT_prepare/db"
+cat_taxonomy: "/path/to/CAT_prepare/tax"
+
+# --- Kraken2 database ---
+# Standard, PlusPF, or custom Kraken2 database
+kraken2_db: "/path/to/kraken2_db"
+
+# --- GTDB-tk marker gene database ---
+# Concatenated bac120 + ar53 marker gene nucleotide sequences from GTDB-tk
+# reference data (typically under markers/tigrfam/ and markers/pfam/)
+gtdb_markers_db: "/path/to/gtdb_markers.fasta"
+
+# --- NCBI taxonomy nodes.dmp (for Kraken2 lineage resolution) ---
+# Usually found in the Kraken2 database directory or NCBI taxdump
+taxonomy_nodes: "/path/to/nodes.dmp"
+
+# --- CAT parameters ---
+cat_r: 10       # number of top DIAMOND hits per ORF
+cat_f: 0.5      # fraction of hits supporting a classification
+
+# --- Kraken2 parameters ---
+kraken2_confidence: 0.1
+
+# --- BLASTn parameters ---
+blast_evalue: 1.0e-10
+blast_perc_identity: 70
+blast_min_length: 100
+
+# --- Viridiplantae NCBI taxonomy ID ---
+viridiplantae_taxid: 33090
+
+# --- Prokaryotic superkingdom keywords (used by CAT ORF filter) ---
+prokaryotic_keywords:
+  - "Bacteria"
+  - "Archaea"
+
+# --- Threads ---
+threads: 16
