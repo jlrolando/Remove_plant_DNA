@@ -7,6 +7,8 @@ Three independent classification branches:
   3. BLASTn vs GTDB-tk marker genes — hard filter for prokaryotic markers
 
 Final confirmed plant contigs = CAT-clean plant MINUS GTDB-marker-hit contigs.
+
+Designed for HiPerGator (UF HPC) with SLURM resource declarations.
 """
 
 configfile: "config.yaml"
@@ -41,6 +43,10 @@ rule cat_contigs:
         r=config["cat_r"],
         f=config["cat_f"],
     threads: config["threads"]
+    resources:
+        mem_mb=config.get("cat_mem_mb", 64000),
+        time_min=config.get("cat_time_min", 2880),
+        slurm_partition=config.get("partition", "hpg-default"),
     shell:
         """
         CAT contigs \
@@ -62,6 +68,10 @@ rule cat_add_names:
         f"{OUTDIR}/cat/contigs.contig2classification.names.txt",
     params:
         tax=config["cat_taxonomy"],
+    resources:
+        mem_mb=4000,
+        time_min=30,
+        slurm_partition=config.get("partition", "hpg-default"),
     shell:
         """
         CAT add_names \
@@ -80,6 +90,10 @@ rule cat_add_names_orf:
         f"{OUTDIR}/cat/contigs.ORF2LCA.names.txt",
     params:
         tax=config["cat_taxonomy"],
+    resources:
+        mem_mb=4000,
+        time_min=30,
+        slurm_partition=config.get("partition", "hpg-default"),
     shell:
         """
         CAT add_names \
@@ -105,6 +119,9 @@ rule filter_cat_plant_contigs:
         plant_prokaryotic=f"{OUTDIR}/cat/cat_plant_prokaryotic_orfs.txt",
     params:
         prok_keywords=config["prokaryotic_keywords"],
+    resources:
+        mem_mb=8000,
+        time_min=30,
     script:
         "scripts/filter_cat_plant_contigs.py"
 
@@ -124,6 +141,10 @@ rule kraken2_classify:
         db=config["kraken2_db"],
         confidence=config["kraken2_confidence"],
     threads: config["threads"]
+    resources:
+        mem_mb=config.get("kraken2_mem_mb", 64000),
+        time_min=config.get("kraken2_time_min", 120),
+        slurm_partition=config.get("partition", "hpg-default"),
     shell:
         """
         kraken2 \
@@ -145,6 +166,9 @@ rule filter_kraken_plant:
     params:
         nodes=config["taxonomy_nodes"],
         viridiplantae_taxid=config["viridiplantae_taxid"],
+    resources:
+        mem_mb=4000,
+        time_min=30,
     script:
         "scripts/filter_kraken_plant.py"
 
@@ -163,6 +187,9 @@ rule makeblastdb_gtdb:
         nsq=f"{OUTDIR}/blast/gtdb_markers.nsq",
     params:
         db_prefix=f"{OUTDIR}/blast/gtdb_markers",
+    resources:
+        mem_mb=4000,
+        time_min=30,
     shell:
         """
         makeblastdb \
@@ -183,6 +210,10 @@ rule blastn_gtdb:
         db_prefix=f"{OUTDIR}/blast/gtdb_markers",
         evalue=config["blast_evalue"],
     threads: config["threads"]
+    resources:
+        mem_mb=config.get("blast_mem_mb", 16000),
+        time_min=config.get("blast_time_min", 480),
+        slurm_partition=config.get("partition", "hpg-default"),
     shell:
         """
         blastn \
@@ -205,6 +236,9 @@ rule parse_blast_gtdb:
     params:
         perc_identity=config["blast_perc_identity"],
         min_length=config["blast_min_length"],
+    resources:
+        mem_mb=4000,
+        time_min=10,
     script:
         "scripts/parse_blast_gtdb.py"
 
@@ -226,6 +260,9 @@ rule compare_classifications:
     output:
         comparison=f"{OUTDIR}/classification_comparison.tsv",
         confirmed_ids=f"{OUTDIR}/confirmed_plant_contig_ids.txt",
+    resources:
+        mem_mb=4000,
+        time_min=10,
     script:
         "scripts/compare_classifications.py"
 
@@ -237,6 +274,9 @@ rule extract_confirmed_plant_contigs:
         ids=f"{OUTDIR}/confirmed_plant_contig_ids.txt",
     output:
         fasta=f"{OUTDIR}/confirmed_plant_contigs.fasta",
+    resources:
+        mem_mb=4000,
+        time_min=10,
     shell:
         """
         seqtk subseq {input.contigs} {input.ids} > {output.fasta}
@@ -256,5 +296,8 @@ rule generate_report:
         confirmed_ids=f"{OUTDIR}/confirmed_plant_contig_ids.txt",
     output:
         report=f"{OUTDIR}/summary_report.tsv",
+    resources:
+        mem_mb=8000,
+        time_min=10,
     script:
         "scripts/generate_report.py"

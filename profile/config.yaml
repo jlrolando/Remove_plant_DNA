@@ -1,0 +1,15 @@
+# Snakemake SLURM executor profile for HiPerGator
+# Usage: snakemake --profile profile/
+executor: slurm
+jobs: 20
+latency-wait: 120
+default-resources:
+  slurm_account: your_group_account
+  slurm_partition: hpg-default
+  mem_mb: 4000
+  time_min: 60
+  threads: 1
+restart-times: 1
+keep-going: true
+rerun-incomplete: true
+printshellcmds: true

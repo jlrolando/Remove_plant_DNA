@@ -1,5 +1,6 @@
 # =============================================================================
 # Configuration for plant contig filtering pipeline
+# Designed for HiPerGator (UF HPC) with SLURM
 # =============================================================================
 
 # --- Input ---
@@ -7,6 +8,7 @@ contigs: "/path/to/seagrass_root_metagenome_contigs.fasta"
 sample_name: "seagrass_root"
 
 # --- Output directory ---
+# Recommended: use /blue/<group>/<user>/ for persistent storage
 outdir: "results"
 
 # --- CAT database paths ---
@@ -49,3 +51,22 @@ prokaryotic_keywords:
 
 # --- Threads ---
 threads: 16
+
+# --- HiPerGator SLURM resources ---
+# SLURM partition (hpg-default for most jobs, bigmem for high-memory)
+partition: "hpg-default"
+# SLURM account (your HiPerGator group account)
+slurm_account: "your_group_account"
+# SLURM QOS
+qos: "your_group_account"
+
+# Per-rule memory (MB) and time (minutes) overrides
+# CAT is the heaviest — DIAMOND against NR needs substantial RAM
+cat_mem_mb: 64000       # 64 GB
+cat_time_min: 2880      # 48 hours
+# Kraken2 loads entire DB into memory
+kraken2_mem_mb: 64000   # 64 GB (adjust to DB size)
+kraken2_time_min: 120   # 2 hours
+# BLASTn — marker gene DB is small, moderate resources
+blast_mem_mb: 16000     # 16 GB
+blast_time_min: 480     # 8 hours
