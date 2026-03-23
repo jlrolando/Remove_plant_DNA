@@ -21,8 +21,11 @@ cat_taxonomy: "/path/to/CAT_prepare/tax"
 kraken2_db: "/path/to/kraken2_db"
 
 # --- GTDB-tk marker gene database ---
-# Concatenated bac120 + ar53 marker gene nucleotide sequences from GTDB-tk
-# reference data (typically under markers/tigrfam/ and markers/pfam/)
+# Nucleotide FASTA of concatenated bac120 + ar53 prokaryotic marker genes.
+# Note: GTDB-tk reference data provides HMM profiles (not FASTA) in
+# markers/tigrfam/ and markers/pfam/. You must obtain or generate a
+# nucleotide FASTA of these marker genes separately (e.g., from GTDB
+# representative genome annotations or public marker gene datasets).
 gtdb_markers_db: "/path/to/gtdb_markers.fasta"
 
 # --- NCBI taxonomy nodes.dmp (for Kraken2 lineage resolution) ---

@@ -66,10 +66,14 @@ kraken2-build --standard --db kraken2_db
 
 ### GTDB-tk marker genes
 
-Concatenate bac120 and ar53 marker gene nucleotide sequences from the GTDB-tk reference data package:
+The pipeline requires a **nucleotide FASTA** of concatenated bac120 and ar53 prokaryotic marker genes for BLASTn screening.
+
+> **Note:** The GTDB-tk reference data directories (`markers/tigrfam/` and `markers/pfam/`) contain HMM profiles, not nucleotide FASTA files. You will need to obtain marker gene nucleotide sequences separately — for example, by extracting them from GTDB representative genome annotations or from a public marker gene nucleotide dataset.
+
+Once you have the nucleotide sequences, concatenate them:
 
 ```bash
-cat gtdbtk_data/markers/tigrfam/*.fna gtdbtk_data/markers/pfam/*.fna > gtdb_markers.fasta
+cat bac120_marker_genes/*.fna ar53_marker_genes/*.fna > gtdb_markers.fasta
 ```
 
 ### NCBI taxonomy
