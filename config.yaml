@@ -20,14 +20,6 @@ cat_taxonomy: "/path/to/CAT_prepare/tax"
 # Standard, PlusPF, or custom Kraken2 database
 kraken2_db: "/path/to/kraken2_db"
 
-# --- GTDB-tk marker gene database ---
-# Nucleotide FASTA of concatenated bac120 + ar53 prokaryotic marker genes.
-# Note: GTDB-tk reference data provides HMM profiles (not FASTA) in
-# markers/tigrfam/ and markers/pfam/. You must obtain or generate a
-# nucleotide FASTA of these marker genes separately (e.g., from GTDB
-# representative genome annotations or public marker gene datasets).
-gtdb_markers_db: "/path/to/gtdb_markers.fasta"
-
 # --- NCBI taxonomy nodes.dmp (for Kraken2 lineage resolution) ---
 # Usually found in the Kraken2 database directory or NCBI taxdump
 taxonomy_nodes: "/path/to/nodes.dmp"
@@ -38,11 +30,6 @@ cat_f: 0.5      # fraction of hits supporting a classification
 
 # --- Kraken2 parameters ---
 kraken2_confidence: 0.1
-
-# --- BLASTn parameters ---
-blast_evalue: 1.0e-10
-blast_perc_identity: 70
-blast_min_length: 100
 
 # --- Viridiplantae NCBI taxonomy ID ---
 viridiplantae_taxid: 33090
@@ -70,6 +57,3 @@ cat_time_min: 2880      # 48 hours
 # Kraken2 loads entire DB into memory
 kraken2_mem_mb: 64000   # 64 GB (adjust to DB size)
 kraken2_time_min: 120   # 2 hours
-# BLASTn — marker gene DB is small, moderate resources
-blast_mem_mb: 16000     # 16 GB
-blast_time_min: 480     # 8 hours

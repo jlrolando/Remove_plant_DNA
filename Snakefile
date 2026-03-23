@@ -1,12 +1,12 @@
 """
 Pipeline: Filter plant contigs from seagrass root metagenomes
 =============================================================
-Three independent classification branches:
+Two independent classification branches:
   1. CAT  — protein-level taxonomy (primary filter, per-ORF prokaryotic check)
   2. Kraken2 — k-mer-based validation
-  3. BLASTn vs GTDB-tk marker genes — hard filter for prokaryotic markers
 
-Final confirmed plant contigs = CAT-clean plant MINUS GTDB-marker-hit contigs.
+Final confirmed plant contigs = CAT-clean plant contigs (Kraken2 agreement
+is recorded but not used as a hard filter).
 
 Designed for HiPerGator (UF HPC) with SLURM resource declarations.
 """
@@ -174,89 +174,18 @@ rule filter_kraken_plant:
 
 
 # =============================================================================
-# Branch 3: BLASTn vs GTDB-tk marker genes
-# =============================================================================
-
-rule makeblastdb_gtdb:
-    """Format GTDB-tk marker gene sequences as a BLAST nucleotide database."""
-    input:
-        markers=config["gtdb_markers_db"],
-    output:
-        nhr=f"{OUTDIR}/blast/gtdb_markers.nhr",
-        nin=f"{OUTDIR}/blast/gtdb_markers.nin",
-        nsq=f"{OUTDIR}/blast/gtdb_markers.nsq",
-    params:
-        db_prefix=f"{OUTDIR}/blast/gtdb_markers",
-    resources:
-        mem_mb=4000,
-        time_min=30,
-    shell:
-        """
-        makeblastdb \
-            -in {input.markers} \
-            -dbtype nucl \
-            -out {params.db_prefix}
-        """
-
-
-rule blastn_gtdb:
-    """BLASTn contigs against GTDB-tk marker gene database."""
-    input:
-        contigs=config["contigs"],
-        nhr=f"{OUTDIR}/blast/gtdb_markers.nhr",
-    output:
-        hits=f"{OUTDIR}/blast/contigs_vs_gtdb_markers.txt",
-    params:
-        db_prefix=f"{OUTDIR}/blast/gtdb_markers",
-        evalue=config["blast_evalue"],
-    threads: config["threads"]
-    resources:
-        mem_mb=config.get("blast_mem_mb", 16000),
-        time_min=config.get("blast_time_min", 480),
-        slurm_partition=config.get("partition", "hpg-default"),
-    shell:
-        """
-        blastn \
-            -query {input.contigs} \
-            -db {params.db_prefix} \
-            -out {output.hits} \
-            -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore" \
-            -evalue {params.evalue} \
-            -num_threads {threads} \
-            -max_target_seqs 5
-        """
-
-
-rule parse_blast_gtdb:
-    """Filter BLAST hits by identity and alignment length thresholds."""
-    input:
-        hits=f"{OUTDIR}/blast/contigs_vs_gtdb_markers.txt",
-    output:
-        flagged=f"{OUTDIR}/blast/contigs_with_gtdb_hits.txt",
-    params:
-        perc_identity=config["blast_perc_identity"],
-        min_length=config["blast_min_length"],
-    resources:
-        mem_mb=4000,
-        time_min=10,
-    script:
-        "scripts/parse_blast_gtdb.py"
-
-
-# =============================================================================
-# Integration: cross-reference all three methods
+# Integration: cross-reference CAT and Kraken2
 # =============================================================================
 
 rule compare_classifications:
     """
-    Cross-reference CAT, Kraken2, and BLASTn results.
-    Final confirmed plant = CAT-clean plant MINUS GTDB-marker-hit contigs.
+    Cross-reference CAT and Kraken2 results.
+    Final confirmed plant = CAT-clean plant contigs.
     """
     input:
         cat_plant_clean=f"{OUTDIR}/cat/cat_plant_clean.txt",
         cat_plant_prokaryotic=f"{OUTDIR}/cat/cat_plant_prokaryotic_orfs.txt",
         kraken2_plant=f"{OUTDIR}/kraken2/kraken2_plant_contigs.txt",
-        gtdb_hits=f"{OUTDIR}/blast/contigs_with_gtdb_hits.txt",
     output:
         comparison=f"{OUTDIR}/classification_comparison.tsv",
         confirmed_ids=f"{OUTDIR}/confirmed_plant_contig_ids.txt",
@@ -292,7 +221,6 @@ rule generate_report:
         cat_plant_clean=f"{OUTDIR}/cat/cat_plant_clean.txt",
         cat_plant_prokaryotic=f"{OUTDIR}/cat/cat_plant_prokaryotic_orfs.txt",
         kraken2_plant=f"{OUTDIR}/kraken2/kraken2_plant_contigs.txt",
-        gtdb_hits=f"{OUTDIR}/blast/contigs_with_gtdb_hits.txt",
         confirmed_ids=f"{OUTDIR}/confirmed_plant_contig_ids.txt",
     output:
         report=f"{OUTDIR}/summary_report.tsv",
